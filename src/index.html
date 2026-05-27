@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Route</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Splash/Welcome Section -->
+  <div id="splash-section" style="position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80') center center/cover no-repeat,linear-gradient(120deg,#1a2233 0%,#232b3e 100%);background-blend-mode:overlay;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <div style="font-size:2.2rem;font-weight:800;color:#43cea2;text-align:center;margin-bottom:2.5rem;min-height:3.5rem;">
+      <span id="typewriter"></span><span id="typewriter-cursor" style="color:#43cea2;font-weight:900;">|</span>
+    </div>
+    <button id="splash-login-btn" style="background:linear-gradient(90deg,#43cea2 60%,#f7b801 100%);color:#232b3e;border:none;font-weight:700;cursor:pointer;border-radius:1rem;padding:1rem 3rem;font-size:1.3rem;box-shadow:0 2px 8px #43cea207;">Login</button>
+  </div>
+  <header class="header">
+    <div class="header-left">
+<img src="../assets/images/logo.png" alt="Smart Route Logo" class="logo" title="Logo">      <h1>Smart Route</h1>
+    </div>
+    <nav>
+      <a href="#home" class="active" id="nav-home">Home</a>
+      <a href="#profile" id="nav-profile">Profile</a>
+      <a href="#alerts" id="nav-alerts">Alerts</a>
+      <a href="#about" id="nav-about">About</a>
+    </nav>
+    <button id="back-btn" class="back-btn" type="button" aria-label="Go back to the previous section">Back</button>
+  </header>
+  <main>
+    <!-- Home Section -->
+    <section id="section-home" class="section active">
+      <div class="card search-section">
+        <div style="display:flex;flex-direction:column;gap:1rem;align-items:center;">
+          <input type="text" id="from" placeholder="Enter your current location (e.g. Delhi, Connaught Place)" style="width:90%;max-width:350px;">
+          <input type="text" id="to" placeholder="Enter your destination (e.g. Noida, AIIMS Hospital)" style="width:90%;max-width:350px;">
+          <button id="search-btn" style="width:90%;max-width:350px;">Show Route</button>
+        </div>
+      </div>
+      <div class="map-card">
+        <h2>Live Map</h2>
+        <div id="map"></div>
+      </div>
+      <div class="card">
+        <h2>Eco-Friendly Score & Badges</h2>
+        <div style="display:flex;align-items:center;gap:1.5rem;">
+          <div style="flex:1;">
+            <div class="eco-score" id="eco-score"></div>
+            <div class="badges" id="badges"></div>
+            <div class="history" id="history"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Alerts Section -->
+    <section id="section-alerts" class="section">
+      <div class="card">
+        <h2>Traffic Alerts</h2>
+        <div id="alerts-list"></div>
+        <button id="add-alert-btn">Add Sample Alert</button>
+      </div>
+      <div class="ambulance-alerts" id="ambulance-alerts-section">
+        <h2 style="color:#b91c1c;">Ambulance Alerts</h2>
+        <div id="ambulance-alerts-list"></div>
+      </div>
+    </section>
+    <!-- Profile Section -->
+    <section id="section-profile" class="section">
+      <div class="profile-card" id="profile-card" style="display:inline;">
+        <h2>Welcome, <span id="profile-username"></span>!</h2>
+        <div class="profile-info">
+          <div><b>Eco Score:</b> <span id="profile-eco"></span></div>
+          <div><b>Badges:</b> <span id="profile-badges"></span></div>
+          <div><b>History:</b> <span id="profile-history"></span></div>
+        </div>
+        <form id="update-password-form">
+          <input type="password" id="new-password" placeholder="New Password (min 8 chars)" required minlength="8">
+          <button type="submit" class="update-btn">Update Password</button>
+          <div id="profile-message" style="color:#43cea2;font-weight:600;"></div>
+        </form>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+      </div>
+      <div class="login-card login-container">
+  <div class="login-page-bg" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; background: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Ffree-backgrounds-photos%2Fcity-traffic&psig=AOvVaw2rfUxC8Mx4clPVFQ3IqCQ6&ust=1759648421357000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJj-w7D_iZADFQAAAAAdAAAAABAE') center center/cover no-repeat, linear-gradient(120deg, #1a2233cc 0%, #232b3ecc 100%); background-blend-mode: overlay;">
+          <div class="login-page-container" style="background: rgba(30,40,60,0.92); border-radius: 1.2rem; box-shadow: 0 4px 24px #232b3e44; max-width: 400px; width: 100%; padding: 2.5rem 2rem; display: flex; flex-direction: column; align-items: stretch; border: 3px solid #43cea2;">
+            <div style="text-align:center; margin-bottom:2rem;">
+              
+              <h2 style="font-size:2rem;font-weight:800;color:#43cea2;letter-spacing:1px;">SMART ROUTE LOGIN </h2>
+              <div style="font-size:1.1rem;color:#e5e7eb;">SignIn or create your account</div>
+            </div>
+            <div class="login-tabs" style="display:flex;justify-content:center;gap:1.2rem;margin-bottom:1.5rem;">
+              <button id="tab-signin" class="login-tab-btn active" type="button" style="background:none;border:none;font-size:1.1rem;font-weight:700;color:#43cea2;padding:0.5rem 1.5rem;border-radius:1rem;cursor:pointer;">Sign In</button>
+              <button id="tab-signup" class="login-tab-btn" type="button" style="background:none;border:none;font-size:1.1rem;font-weight:700;color:#43cea2;padding:0.5rem 1.5rem;border-radius:1rem;cursor:pointer;">Sign Up</button>
+            </div>
+            <form id="login-form" style="display:block;animation:fadeIn 0.5s;" autocomplete="off">
+              <div style="margin-bottom:1rem;">
+                <label for="login-username" style="color:#e5e7eb;font-weight:600;">Email or Username</label>
+                <input type="text" id="login-username" placeholder="Enter your email or username" required style="width:80%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <div style="margin-bottom:0.5rem;">
+                <label for="login-password" style="color:#e5e7eb;font-weight:600;">Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password" required style="width:80%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <div style="text-align:right;margin-bottom:1rem;"><a href="#" id="show-forgot-link" style="color:#43cea2;text-decoration:none;font-weight:600;font-size:1rem;">Forgot Password?</a></div>
+              <button type="submit" class="auth-btn" style="background:linear-gradient(90deg,#43cea2 60%,#f7b801 100%);color:#232b3e;border:none;font-weight:700;cursor:pointer;border-radius:1rem;padding:0.85rem 2rem;font-size:1.1rem;box-shadow:0 2px 8px #43cea207;margin-top:0.5rem;width:100%;">Sign In</button>
+              <div class="auth-message" id="login-message" style="min-height:1.2em;color:#ef4444;font-weight:600;text-align:center;margin-top:0.5rem;"></div>
+            </form>
+            <form id="signup-form" style="display:none;animation:fadeIn 0.5s;" autocomplete="off">
+              <div style="margin-bottom:1rem;">
+                <label for="signup-name" style="color:#e5e7eb;font-weight:600;">Full Name</label>
+                <input type="text" id="signup-name" placeholder="Enter your full name" required style="width:100%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <div style="margin-bottom:1rem;">
+                <label for="signup-email" style="color:#e5e7eb;font-weight:600;">Email</label>
+                <input type="email" id="signup-email" placeholder="Enter your email" required style="width:100%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <div style="margin-bottom:1rem;">
+                <label for="signup-password" style="color:#e5e7eb;font-weight:600;">Password</label>
+                <input type="password" id="signup-password" placeholder="Enter your password" required minlength="8" style="width:100%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <div style="margin-bottom:1.2rem;">
+                <label for="signup-confirm" style="color:#e5e7eb;font-weight:600;">Confirm Password</label>
+                <input type="password" id="signup-confirm" placeholder="Confirm your password" required minlength="8" style="width:100%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <button type="submit" class="auth-btn" style="background:linear-gradient(90deg,#43cea2 60%,#f7b801 100%);color:#232b3e;border:none;font-weight:700;cursor:pointer;border-radius:1rem;padding:0.85rem 2rem;font-size:1.1rem;box-shadow:0 2px 8px #43cea207;margin-top:0.5rem;width:100%;">Sign Up</button>
+              <div class="auth-message" id="signup-message" style="min-height:1.2em;color:#ef4444;font-weight:600;text-align:center;margin-top:0.5rem;"></div>
+            </form>
+            <form id="forgot-form" style="display:none;animation:fadeIn 0.5s;" autocomplete="off">
+              <div style="margin-bottom:1rem;text-align:center;font-size:1.2rem;color:#43cea2;font-weight:700;">Password Recovery</div>
+              <div style="margin-bottom:1.2rem;">
+                <label for="forgot-email" style="color:#e5e7eb;font-weight:600;">Email or Username</label>
+                <input type="text" id="forgot-email" placeholder="Enter your email or username" required style="width:100%;padding:0.85rem 1.2rem;border-radius:1rem;border:1.5px solid #43cea2;background:rgba(35,43,62,0.95);color:#fff;margin-top:0.3rem;">
+              </div>
+              <button type="submit" class="auth-btn" style="background:linear-gradient(90deg,#43cea2 60%,#f7b801 100%);color:#232b3e;border:none;font-weight:700;cursor:pointer;border-radius:1rem;padding:0.85rem 2rem;font-size:1.1rem;box-shadow:0 2px 8px #43cea207;margin-top:0.5rem;width:100%;">Send Reset Link</button>
+              <div class="auth-message" id="forgot-message" style="min-height:1.2em;color:#ef4444;font-weight:600;text-align:center;margin-top:0.5rem;"></div>
+              <div style="text-align:center;margin-top:1rem;"><a href="#" id="show-login-link2" style="color:#43cea2;text-decoration:underline;font-size:1rem;">Back to Login</a></div>
+            </form>
+          </div>
+        </div>
+  <script>
+    // Typewriter animation for splash
+    const typewriterText = 'Welcome to the Smart Route website';
+    let twIndex = 0;
+    function typeWriter() {
+      if (twIndex <= typewriterText.length) {
+        document.getElementById('typewriter').textContent = typewriterText.substring(0, twIndex);
+        twIndex++;
+        setTimeout(typeWriter, 70);
+      }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      typeWriter();
+      document.getElementById('splash-login-btn').onclick = function() {
+        document.getElementById('splash-section').style.display = 'none';
+        // Show main homepage (SPA default section)
+        document.querySelector('main').style.display = '';
+        document.querySelector('.header').style.display = '';
+      };
+      // Hide main and header until splash is done
+      document.querySelector('main').style.display = 'none';
+      document.querySelector('.header').style.display = 'none';
+    });
+  </script>
+  <script>
+    // Enhanced routing using OSRM demo server - overrides previous simple straight-line route
+    (function(){
+      const btn = document.getElementById('search-btn');
+      if(!btn) return;
+      async function geocode(place){
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data && data.length) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        return null;
+      }
+
+      function clearRouteLayer(){ if(window.routeLayer) routeLayer.clearLayers(); }
+
+      function renderDirectionsList(steps){
+        let container = document.getElementById('directions-list');
+        if(!container){
+          container = document.createElement('div');
+          container.id = 'directions-list';
+          container.style = 'position:fixed;right:1rem;top:6rem;z-index:9999;max-width:320px;max-height:60vh;overflow:auto;background:rgba(10,20,36,0.85);color:#e5e7eb;padding:0.8rem;border-radius:0.8rem;box-shadow:0 8px 40px rgba(0,0,0,0.6);';
+          document.body.appendChild(container);
+        }
+        container.innerHTML = '<h3 style="margin:0 0 0.5rem 0;color:#43cea2;">Directions</h3>' +
+          (steps.length ? '<ol style="padding-left:1rem;margin:0;">' + steps.map(s => `<li style="margin:0.35rem 0;font-size:0.95rem;">${s}</li>`).join('') + '</ol>' : '<div style="opacity:0.8">No directions available.</div>');
+      }
+
+      btn.onclick = async function(e){
+        e && e.preventDefault();
+        const from = document.getElementById('from').value;
+        const to = document.getElementById('to').value;
+        if(!from || !to){ alert('Please enter both start and destination.'); return; }
+        clearRouteLayer();
+        const start = await geocode(from);
+        const end = await geocode(to);
+        if(!start || !end){ alert('Could not geocode one or both locations. Try more specific names.'); return; }
+
+        // OSRM expects lon,lat
+        const coords = `${start[1]},${start[0]};${end[1]},${end[0]}`;
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=true&annotations=duration,distance`;
+        try{
+          const r = await fetch(osrmUrl);
+          const j = await r.json();
+          if(!j || j.code !== 'Ok' || !j.routes || !j.routes.length){ alert('Routing failed.'); return; }
+          const route = j.routes[0];
+          // draw route
+          const geo = route.geometry;
+          const routeLine = L.geoJSON(geo, { style: { color: '#2563eb', weight: 6, opacity: 0.9 } });
+          routeLine.addTo(routeLayer);
+          // Fit map
+          try { map.fitBounds(routeLine.getBounds(), { padding: [40,40] }); } catch(err) { }
+          // start/end markers
+          L.marker(start, { title: 'Start' }).addTo(routeLayer);
+          L.marker(end, { title: 'End' }).addTo(routeLayer);
+
+          // ETA & distance
+          const meters = route.distance || 0;
+          const duration = route.duration || 0;
+          const km = (meters/1000).toFixed(1);
+          const mins = Math.round(duration/60);
+          const routeInfoEl = document.getElementById('route-info'); if(routeInfoEl) routeInfoEl.textContent = `Route: ${km} km`;
+          const etaEl = document.getElementById('eta-info'); if(etaEl) etaEl.textContent = `ETA: ${mins} min`;
+          const congEl = document.getElementById('congestion-info'); if(congEl) congEl.textContent = '';
+
+          // Build step texts
+          const steps = [];
+          if(route.legs && route.legs.length){
+            route.legs.forEach(leg => {
+              leg.steps.forEach(st => {
+                const m = st.maneuver || {};
+                const name = st.name || '';
+                const type = m.type || '';
+                const mod = m.modifier || '';
+                const distance = st.distance ? `${(st.distance/1000).toFixed(2)} km` : '';
+                const txt = `${type} ${mod} ${name} ${distance}`.replace(/\s+/g,' ').trim();
+                steps.push(txt || 'Continue');
+              });
+            });
+          }
+          renderDirectionsList(steps);
+
+          // store lastRouteCoords for ambulance polling
+          if(geo && geo.coordinates){
+            lastRouteCoords = geo.coordinates.map(c => [c[1], c[0]]);
+          }
+        }catch(err){ console.error('Routing error', err); alert('Routing error, see console.'); }
+      };
+    })();
+  </script>
+      </div>
+    </section>
+    <!-- About Section -->
+    <!-- Parking Availability Section -->
+
+    <section id="section-parking" class="section">
+      <div class="card" style="background:rgba(30,40,60,0.92);border-radius:1.2rem;box-shadow:0 4px 24px #232b3e44;padding:2.5rem 2rem;max-width:900px;margin:2rem auto;">
+        <h2 style="font-size:2rem;font-weight:800;color:#43cea2;margin-bottom:1.2rem;letter-spacing:1px;">Parking Availability</h2>
+        <button id="refresh-parking-btn" style="background:linear-gradient(90deg,#43cea2 60%,#f7b801 100%);color:#232b3e;border:none;font-weight:700;cursor:pointer;border-radius:1rem;padding:0.7rem 2.2rem;font-size:1.1rem;box-shadow:0 2px 8px #43cea207;margin-bottom:1.5rem;float:right;">Refresh Availability</button>
+        <div id="parking-list" class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1.5rem;clear:both;"></div>
+      </div>
+    </section>
+
+    <section id="section-about" class="section">
+      <div class="card">
+        <h2>About Smart Traffic Management</h2>
+        <p>Smart Traffic Management uses AI-powered congestion control, eco-friendly route suggestions, emergency vehicle priority, and public transport integration to make city travel faster, safer, and greener.</p>
+        <ul>
+          <li>AI-based congestion prediction and control</li>
+          <li>Eco-friendly route suggestions</li>
+          <li>Emergency vehicle priority routing</li>
+          <li>Live traffic alerts and weather updates</li>
+          <li>Public transport integration</li>
+          <li>User achievements and eco-score tracking</li>
+        </ul>
+      </div>
+    </section>
+  <script>
+    // --- Split Auth UI Logic ---
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const forgotForm = document.getElementById('forgot-form');
+    const profileView = document.getElementById('profile-view');
+    const showLoginBtn = document.getElementById('show-login');
+    const showSignupBtn = document.getElementById('show-signup');
+    const forgotLink = document.getElementById('forgot-link');
+
+    function switchAuthForm(form) {
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      if (form === 'login') {
+        loginForm.classList.add('active');
+      } else if (form === 'signup') {
+        signupForm.classList.add('active');
+      } else if (form === 'forgot') {
+        forgotForm.classList.add('active');
+      } else if (form === 'profile') {
+        profileView.classList.add('active');
+      }
+    }
+    showLoginBtn.onclick = () => {
+      switchAuthForm('login');
+      showLoginBtn.classList.add('active');
+      showSignupBtn.classList.remove('active');
+    };
+    showSignupBtn.onclick = () => {
+      switchAuthForm('signup');
+      showSignupBtn.classList.add('active');
+      showLoginBtn.classList.remove('active');
+    };
+    forgotLink.onclick = (e) => {
+      e.preventDefault();
+      switchAuthForm('forgot');
+    };
+
+    // --- Auth Data Logic ---
+    function getAllUsers() {
+      const users = localStorage.getItem('smartRootUsers');
+      return users ? JSON.parse(users) : [];
+    }
+    function saveAllUsers(users) {
+      localStorage.setItem('smartRootUsers', JSON.stringify(users));
+    }
+    function saveSession(user) {
+      localStorage.setItem('smartRootSession', JSON.stringify(user));
+    }
+    function getSession() {
+      const u = localStorage.getItem('smartRootSession');
+      return u ? JSON.parse(u) : null;
+    }
+    function clearSession() {
+      localStorage.removeItem('smartRootSession');
+    }
+    // --- Sign Up ---
+    signupForm.onsubmit = function(e) {
+      e.preventDefault();
+      if (profileView.classList.contains('active')) return;
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+      const message = document.getElementById('signup-message');
+      if (!name || !email || !password || !confirm) {
+        message.textContent = 'All fields are required.';
+        return;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        message.textContent = 'Enter a valid email address.';
+        return;
+      }
+      if (password.length < 8 || !/\d/.test(password) || !/[A-Z]/.test(password)) {
+        message.textContent = 'Password must be at least 8 characters, contain a number and an uppercase letter.';
+        return;
+      }
+      if (password !== confirm) {
+        message.textContent = 'Passwords do not match.';
+        return;
+      }
+      const users = getAllUsers();
+      if (users.find(u => u.email === email)) {
+        message.textContent = 'Email already registered.';
+        return;
+      }
+      const user = { name, email, password };
+      users.push(user);
+      saveAllUsers(users);
+      saveSession(user);
+      showProfileView(user);
+    };
+    // --- Sign In ---
+    loginForm.onsubmit = function(e) {
+      e.preventDefault();
+      if (profileView.classList.contains('active')) return;
+      const email = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const message = document.getElementById('login-message');
+      const users = getAllUsers();
+      const user = users.find(u => (u.email === email || u.name === email) && u.password === password);
+      if (user) {
+        saveSession(user);
+        showProfileView(user);
+        message.textContent = '';
+      } else {
+        message.textContent = 'Invalid credentials.';
+      }
+    };
+    // --- Forgot Password ---
+    forgotForm.onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      const message = document.getElementById('forgot-message');
+      const users = getAllUsers();
+      if (users.find(u => u.email === email || u.name === email)) {
+        message.style.color = '#43cea2';
+        message.textContent = 'A reset link has been sent (simulated).';
+      } else {
+        message.style.color = '#ef4444';
+        message.textContent = 'User not found.';
+      }
+    };
+    // --- Profile View ---
+    function showProfileView(user) {
+      switchAuthForm('profile');
+      document.getElementById('profile-username').textContent = user.name;
+      document.getElementById('profile-fullname').textContent = user.name;
+      document.getElementById('profile-email').textContent = user.email;
+    }
+    document.getElementById('logout-btn').onclick = function() {
+      clearSession();
+      switchAuthForm('login');
+      showLoginBtn.classList.add('active');
+      showSignupBtn.classList.remove('active');
+    };
+    // --- On Load: Show session or login ---
+    window.addEventListener('DOMContentLoaded', function() {
+      const user = getSession();
+      if (user) {
+        showProfileView(user);
+      } else {
+        switchAuthForm('login');
+        showLoginBtn.classList.add('active');
+        showSignupBtn.classList.remove('active');
+      }
+    });
+  </script>
+    <!-- Alerts Section -->
+    <section id="section-alerts" class="section">
+      <div class="card">
+        <h2>Traffic Alerts</h2>
+        <div id="alerts-list"></div>
+        <button id="add-alert-btn">Add Sample Alert</button>
+      </div>
+      <div class="ambulance-alerts" id="ambulance-alerts-section">
+        <h2 style="color:#b91c1c;">Ambulance Alerts</h2>
+        <div id="ambulance-alerts-list"></div>
+      </div>
+    </section>
+    <!-- About Section -->
+    <section id="section-about" class="section">
+      <div class="card">
+        <h2>About Smart Traffic Management</h2>
+        <p>Smart Traffic Management uses AI-powered congestion control, eco-friendly route suggestions, emergency vehicle priority, and public transport integration to make city travel faster, safer, and greener.</p>
+        <ul>
+          <li>AI-based congestion prediction and control</li>
+          <li>Eco-friendly route suggestions</li>
+          <li>Emergency vehicle priority routing</li>
+          <li>Live traffic alerts and weather updates</li>
+          <li>Public transport integration</li>
+          <li>User achievements and eco-score tracking</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 Smart Route. All rights reserved.
+  </footer>
+  <script>
+    // --- SPA Navigation ---
+    const navLinks = [
+      { id: 'nav-home', section: 'section-home' },
+      { id: 'nav-profile', section: 'section-profile' },
+      { id: 'nav-alerts', section: 'section-alerts' },
+      { id: 'nav-about', section: 'section-about' }
+    ];
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+      navLinks.forEach(l => document.getElementById(l.id).classList.remove('active'));
+      const nav = navLinks.find(l => l.section === sectionId);
+      if (nav) document.getElementById(nav.id).classList.add('active');
+      // Special: initialize map if Home
+      if (sectionId === 'section-home') {
+        setTimeout(() => { if (window.map && window.L) window.map.invalidateSize(); }, 200);
+      }
+      // Special: show profile if logged in
+      if (sectionId === 'section-profile') {
+        const user = getUser();
+        if (user) {
+          showProfile(user);
+        } else {
+          showLoginForm();
+        }
+      }
+    }
+    navLinks.forEach(link => {
+      document.getElementById(link.id).onclick = function(e) {
+        e.preventDefault();
+        showSection(link.section);
+      };
+    });
+    // On load, show Home
+    window.addEventListener('DOMContentLoaded', function() {
+      showSection('section-home');
+    });
+
+    // --- Leaflet Map Integration ---
+    let map, routeLayer;
+    function initMap() {
+      if (map) return;
+      map = L.map('map').setView([28.6139, 77.2090], 12); // Default: New Delhi
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      routeLayer = L.layerGroup().addTo(map);
+      // Add many ambulance symbols for realism
+      const ambulanceIcon = L.divIcon({ html: '<span style="font-size:2rem;">🚑</span>', iconSize: [32,32], className: '' });
+      const ambulanceCoords = [
+  // Delhi/NCR
+  [28.6139, 77.2090], [28.6315, 77.2167], [28.5708, 77.3260], [28.5672, 77.2100], [28.6289, 77.2410],
+  [28.7041, 77.1025], [28.5355, 77.3910], [28.4595, 77.0266], [28.4089, 77.3178], [28.6692, 77.4538],
+  [28.4744, 77.5030], [28.6448, 77.2167], [28.5672, 77.3210], [28.6130, 77.2300], [28.7046, 77.2025],
+  [28.5355, 77.2250], [28.6517, 77.2219], [28.5245, 77.1855], [28.4089, 77.1025], [28.6692, 77.1025],
+  // Major Indian cities
+  [19.0760, 72.8777], // Mumbai
+  [12.9716, 77.5946], // Bangalore
+  [13.0827, 80.2707], // Chennai
+  [22.5726, 88.3639], // Kolkata
+  [17.3850, 78.4867], // Hyderabad
+  [23.0225, 72.5714], // Ahmedabad
+  [18.5204, 73.8567], // Pune
+  [26.9124, 75.7873], // Jaipur
+  [21.1702, 72.8311], // Surat
+  [11.0168, 76.9558], // Coimbatore
+  [21.2514, 81.6296], // Raipur
+  [25.5941, 85.1376], // Patna
+  [22.7196, 75.8577], // Indore
+  [26.8467, 80.9462], // Lucknow
+  [15.2993, 74.1240], // Goa
+  [27.1767, 78.0081], // Agra
+  [24.5854, 73.7125], // Udaipur
+  [30.7333, 76.7794], // Chandigarh
+  [34.0837, 74.7973], // Srinagar
+  [32.7266, 74.8570], // Jammu
+  [9.9312, 76.2673],  // Kochi
+  [8.5241, 76.9366],  // Thiruvananthapuram
+  [13.6288, 79.4192], // Tirupati
+  [22.3072, 73.1812], // Vadodara
+  [23.1765, 75.7885], // Ujjain
+  [25.3176, 82.9739], // Varanasi
+  [28.9845, 77.7064], // Meerut
+  [24.5854, 73.7125], // Udaipur
+  [20.2961, 85.8245], // Bhubaneswar
+  [19.2183, 72.9781], // Navi Mumbai
+  [22.5726, 88.3639], // Howrah
+  [12.2958, 76.6394], // Mysore
+  [10.8505, 76.2711], // Palakkad
+  [11.9416, 79.8083], // Puducherry
+  [15.8281, 78.0373], // Kurnool
+  [16.5062, 80.6480], // Vijayawada
+  [17.6868, 83.2185], // Visakhapatnam
+  [24.5854, 73.7125], // Udaipur
+  [23.3441, 85.3096], // Ranchi
+  [25.4358, 81.8463], // Allahabad
+  [22.7451, 75.8925], // Dewas
+  [23.8315, 91.2868], // Agartala
+  [26.1445, 91.7362], // Guwahati
+  [27.4837, 94.9120], // Itanagar
+  [25.5941, 85.1376], // Patna
+  [23.6102, 85.2799], // Bokaro
+  [25.5941, 85.1376], // Patna
+  [26.9124, 75.7873], // Jaipur
+  [28.4089, 77.3178]  // Faridabad (repeat for density)
+      ];
+      ambulanceCoords.forEach(coord => {
+        L.marker(coord, { icon: ambulanceIcon, title: 'Ambulance' }).addTo(routeLayer);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      initMap();
+    });
+
+    // --- Search & Route Suggestion ---
+    document.getElementById('search-btn').onclick = async function() {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      if (from && to) {
+        routeLayer.clearLayers();
+        async function geocode(place) {
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data && data.length > 0) {
+            return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          }
+          return null;
+        }
+        const start = await geocode(from);
+        const end = await geocode(to);
+        if (start && end) {
+          L.polyline([start, end], { color: '#2563eb', weight: 6, opacity: 0.8 }).addTo(routeLayer);
+          L.marker(start, { title: 'Start' }).addTo(routeLayer);
+          L.marker(end, { title: 'End' }).addTo(routeLayer);
+          map.fitBounds([start, end], { padding: [50, 50] });
+          document.getElementById('route-info').textContent = `Smart route from ${from} to ${to} avoiding congestion.`;
+          document.getElementById('eta-info').textContent = 'ETA: 25 min';
+          document.getElementById('congestion-info').textContent = 'Congestion: Moderate';
+        } else {
+          alert('Could not find one or both locations. Please try more specific names.');
+          document.getElementById('route-info').textContent = '';
+          document.getElementById('eta-info').textContent = '';
+          document.getElementById('congestion-info').textContent = '';
+        }
+      } else {
+        routeLayer.clearLayers();
+        document.getElementById('route-info').textContent = '';
+        document.getElementById('eta-info').textContent = '';
+        document.getElementById('congestion-info').textContent = '';
+      }
+    };
+
+    // --- Alerts (Dummy Data) ---
+    function renderAlerts() {
+      const alerts = [
+        'Accident on Main St. Expect delays.',
+        'Roadblock at Elm Ave. Use alternate route.',
+        'Heavy congestion on Highway 7.'
+      ];
+      const list = document.getElementById('alerts-list');
+      list.innerHTML = '';
+      alerts.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'alert';
+        div.textContent = msg;
+        list.appendChild(div);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', renderAlerts);
+
+    // --- Ambulance Alert System ---
+    const ambulanceMessages = [
+      'Ambulance approaching Main St. - Clear the way!',
+      'Emergency vehicle detected near Connaught Place.',
+      'Ambulance passing through Noida Sector 18.',
+      'Urgent: Ambulance on route to AIIMS Hospital.',
+      'Alert: Emergency vehicle on Ring Road.'
+    ];
+    const ambulanceLocations = [
+      [28.6139, 77.2090], // New Delhi
+      [28.6315, 77.2167], // Connaught Place
+      [28.5708, 77.3260], // Noida Sector 18
+      [28.5672, 77.2100], // AIIMS Hospital
+      [28.6289, 77.2410]  // Ring Road
+    ];
+    function addAmbulanceAlert(msg, location) {
+      const list = document.getElementById('ambulance-alerts-list');
+      const div = document.createElement('div');
+      div.className = 'ambulance-alert';
+      div.textContent = msg;
+      list.prepend(div);
+      setTimeout(() => div.remove(), 10000);
+      // Add ambulance symbol to map
+      if (map && location) {
+        const icon = L.divIcon({
+          html: '<span style="font-size:2rem;">🚑</span>',
+          iconSize: [32,32],
+          className: ''
+        });
+        const marker = L.marker(location, { icon, title: 'Ambulance Alert' }).addTo(routeLayer);
+        setTimeout(() => routeLayer.removeLayer(marker), 10000);
+      }
+    }
+    function startAmbulanceAlerts() {
+      setInterval(() => {
+        const idx = Math.floor(Math.random() * ambulanceMessages.length);
+        addAmbulanceAlert(ambulanceMessages[idx], ambulanceLocations[idx]);
+      }, 4000);
+    }
+    document.addEventListener('DOMContentLoaded', startAmbulanceAlerts);
+
+    // --- User Auth Logic ---
+    function saveUser(user) {
+      localStorage.setItem('smartRouteUser', JSON.stringify(user));
+    }
+    function getUser() {
+      const u = localStorage.getItem('smartRouteUser');
+      return u ? JSON.parse(u) : null;
+    }
+    function clearUser() {
+      localStorage.removeItem('smartRouteUser');
+    }
+    function getAllUsers() {
+      const users = localStorage.getItem('smartRouteUsers');
+      return users ? JSON.parse(users) : [];
+    }
+    function saveAllUsers(users) {
+      localStorage.setItem('smartRouteUsers', JSON.stringify(users));
+    }
+    function showProfile(user) {
+      document.querySelector('.login-card').style.display = 'none';
+      document.getElementById('profile-card').style.display = '';
+      document.getElementById('profile-username').textContent = user.username;
+      document.getElementById('profile-eco').textContent = user.ecoScore || '82';
+      document.getElementById('profile-badges').innerHTML = (user.badges || ['Eco Driver','Safe Traveler']).map(b => `<span class="profile-badge">${b}</span>`).join(' ');
+      document.getElementById('profile-history').textContent = (user.history || ['Delhi to Connaught Place','Connaught Place to Noida']).join(', ');
+    }
+    function showLoginForm() {
+      document.querySelector('.login-card').style.display = '';
+      document.getElementById('profile-card').style.display = 'none';
+      document.getElementById('login-form').style.display = '';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'none';
+    }
+    // Login form logic
+    document.getElementById('login-form').onsubmit = function(e) {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const users = getAllUsers();
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+        saveUser(user);
+        showProfile(user);
+        document.getElementById('login-message').textContent = '';
+      } else {
+        document.getElementById('login-message').textContent = 'Invalid username or password.';
+      }
+    };
+    // Signup logic
+    document.getElementById('show-signup-link').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = '';
+      document.getElementById('forgot-form').style.display = 'none';
+    };
+    document.getElementById('show-login-link').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('login-form').style.display = '';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'none';
+    };
+    document.getElementById('signup-form').onsubmit = function(e) {
+      e.preventDefault();
+      const username = document.getElementById('signup-username').value.trim();
+      const password = document.getElementById('signup-password').value;
+      if (username && password.length >= 8) {
+        const users = getAllUsers();
+        if (users.find(u => u.username === username)) {
+          document.getElementById('signup-message').textContent = 'Username already exists.';
+          return;
+        }
+        const user = { username, password, ecoScore: 82, badges: ['Eco Driver'], history: [] };
+        users.push(user);
+        saveAllUsers(users);
+        saveUser(user);
+        showProfile(user);
+      } else {
+        document.getElementById('signup-message').textContent = 'Please enter valid details.';
+      }
+    };
+    // Forgot password logic
+    document.getElementById('show-forgot-link').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = '';
+    };
+    document.getElementById('show-login-link2').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('login-form').style.display = '';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'none';
+    };
+    document.getElementById('forgot-form').onsubmit = function(e) {
+      e.preventDefault();
+      const username = document.getElementById('forgot-username').value.trim();
+      const users = getAllUsers();
+      if (users.find(u => u.username === username)) {
+        document.getElementById('forgot-message').textContent = 'A password reset link has been sent to your email (simulated).';
+      } else {
+        document.getElementById('forgot-message').textContent = 'Username not found.';
+      }
+    };
+    // Logout and update password
+    document.getElementById('logout-btn').onclick = function() {
+      clearUser();
+      showLoginForm();
+    };
+    document.getElementById('update-password-form').onsubmit = function(e) {
+      e.preventDefault();
+      const user = getUser();
+      const newPass = document.getElementById('new-password').value;
+      if (user && newPass.length >= 8) {
+        user.password = newPass;
+        saveUser(user);
+        // Update in all users
+        const users = getAllUsers().map(u => u.username === user.username ? user : u);
+        saveAllUsers(users);
+        document.getElementById('profile-message').textContent = 'Password updated!';
+        document.getElementById('new-password').value = '';
+      }
+    };
+    // --- Eco Score, Badges, History ---
+    function renderEco() {
+      const score = Math.floor(Math.random() * 31) + 70;
+      document.getElementById('eco-score').textContent = `Eco Score: ${score} / 100`;
+      document.getElementById('badges').innerHTML = `<span class='badge'>Eco Driver</span> <span class='badge'>Congestion Buster</span>`;
+      document.getElementById('history').textContent = 'This week: 5 trips, 12km, 15% less emissions.';
+    }
+    document.addEventListener('DOMContentLoaded', renderEco);
+    // --- Add Alert Button ---
+    document.getElementById('add-alert-btn').onclick = function() {
+      const msgs = [
+        'Weather Alert: Heavy rain expected.',
+        'Roadblock at Sector 18.',
+        'Construction work at Ring Road.'
+      ];
+      const msg = msgs[Math.floor(Math.random() * msgs.length)];
+      const list = document.getElementById('alerts-list');
+      const div = document.createElement('div');
+      div.className = 'alert';
+      div.textContent = msg;
+      list.prepend(div);
+    };
+
+    // --- Ambulance Alert Integration ---
+    async function fetchAmbulanceAlerts() {
+      // Replace with your backend URL if needed
+      const res = await fetch('http://localhost:5000/api/ambulance-alerts');
+      return await res.json();
+    }
+    function isAmbulanceNearRoute(amb, route) {
+      function distance(a, b) {
+        const R = 6371000;
+        const dLat = (b[0]-a[0]) * Math.PI/180;
+        const dLon = (b[1]-a[1]) * Math.PI/180;
+        const lat1 = a[0] * Math.PI/180;
+        const lat2 = b[0] * Math.PI/180;
+        const aVal = Math.sin(dLat/2)**2 + Math.sin(dLon/2)**2 * Math.cos(lat1) * Math.cos(lat2);
+        return R * 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1-aVal));
+      }
+      return route.some(pt => distance(amb, pt) < 300); // 300 meters
+    }
+    function showAmbulanceBanner() {
+      let banner = document.getElementById('ambulance-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'ambulance-banner';
+        banner.innerHTML = '🚑 Ambulance detected near you. Please cooperate.';
+        banner.style = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:#fff;font-size:1.3rem;text-align:center;padding:1rem;z-index:9999;animation:fadeInBanner 0.7s;';
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 8000);
+      }
+    }
+    function playSiren() {
+      if (!window.sirenAudio) {
+        window.sirenAudio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_115b6b2b7b.mp3');
+      }
+      window.sirenAudio.play();
+    }
+    function addAmbulanceMarkers(ambulances, routeCoords) {
+      ambulances.forEach(a => {
+        const icon = L.divIcon({
+          html: '<span style="font-size:2rem;animation:ambulancePulse 1s infinite;">🚑</span>',
+          iconSize: [32,32],
+          className: ''
+        });
+        const marker = L.marker([a.lat, a.lon], { icon, title: 'Live Ambulance' }).addTo(routeLayer);
+        marker.bindTooltip('Live Ambulance', {permanent: false});
+        if (isAmbulanceNearRoute([a.lat, a.lon], routeCoords)) {
+          showAmbulanceBanner();
+          playSiren();
+        }
+        setTimeout(() => routeLayer.removeLayer(marker), 20000);
+      });
+    }
+    // --- Update route search logic ---
+    const oldSearchBtnHandler = document.getElementById('search-btn').onclick;
+    document.getElementById('search-btn').onclick = async function() {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      if (from && to) {
+        routeLayer.clearLayers();
+        async function geocode(place) {
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data && data.length > 0) {
+            return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          }
+          return null;
+        }
+        const start = await geocode(from);
+        const end = await geocode(to);
+        if (start && end) {
+          L.polyline([start, end], { color: '#2563eb', weight: 6, opacity: 0.8 }).addTo(routeLayer);
+          L.marker(start, { title: 'Start' }).addTo(routeLayer);
+          L.marker(end, { title: 'End' }).addTo(routeLayer);
+          map.fitBounds([start, end], { padding: [50, 50] });
+          document.getElementById('route-info').textContent = `Smart route from ${from} to ${to} avoiding congestion.`;
+          document.getElementById('eta-info').textContent = 'ETA: 25 min';
+          document.getElementById('congestion-info').textContent = 'Congestion: Moderate';
+          // Fetch and show ambulances
+          const ambulances = await fetchAmbulanceAlerts();
+          addAmbulanceMarkers(ambulances, [start, end]);
+        } else {
+          alert('Could not find one or both locations. Please try more specific names.');
+          document.getElementById('route-info').textContent = '';
+          document.getElementById('eta-info').textContent = '';
+          document.getElementById('congestion-info').textContent = '';
+        }
+      } else {
+        routeLayer.clearLayers();
+        document.getElementById('route-info').textContent = '';
+        document.getElementById('eta-info').textContent = '';
+        document.getElementById('congestion-info').textContent = '';
+      }
+    };
+    // --- Real-time polling for ambulances ---
+    let lastRouteCoords = [];
+    function pollAmbulances() {
+      if (lastRouteCoords.length) {
+        fetchAmbulanceAlerts().then(ambulances => {
+          addAmbulanceMarkers(ambulances, lastRouteCoords);
+        });
+      }
+    }
+    setInterval(pollAmbulances, 15000);
+    // Save route coords on each search
+    const originalSearchBtn = document.getElementById('search-btn');
+    originalSearchBtn.addEventListener('click', async function() {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      async function geocode(place) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        }
+        return null;
+      }
+      const start = await geocode(from);
+      const end = await geocode(to);
+      if (start && end) {
+        lastRouteCoords = [start, end];
+      }
+    });
+  </script>
+  <script src="script.js" defer></script>
+</body>
+  <script>
+    // --- Parking Availability Feature ---
+    const parkingLots = [
+      { name: 'Alwal Place Parking', coords: [28.6315, 77.2167], distance: 1.2 },
+      { name: 'Noida City Center Parking', coords: [28.5708, 77.3260], distance: 7.8 },
+      { name: 'AIIMS Metro Parking', coords: [28.5672, 77.2100], distance: 5.1 },
+      { name: 'Karol Bagh Multi-level', coords: [28.6448, 77.2167], distance: 3.4 },
+      { name: 'Saket Mall Parking', coords: [28.5245, 77.1855], distance: 8.2 },
+      { name: 'Gurgaon Cyber Hub Parking', coords: [28.4595, 77.0266], distance: 18.5 },
+      { name: 'Indira Gandhi Airport Parking', coords: [28.5562, 77.1000], distance: 14.7 },
+      { name: 'Lotus Temple Parking', coords: [28.5535, 77.2588], distance: 9.3 },
+      { name: 'DLF Mall Noida Parking', coords: [28.5672, 77.3210], distance: 10.1 },
+      { name: 'Sector 18 Noida Parking', coords: [28.5708, 77.3260], distance: 7.9 }
+    ];
+    function getRandomStatus() {
+      const r = Math.random();
+      if (r < 0.5) return { status: 'Available', dot: '🟢' };
+      if (r < 0.8) return { status: 'Filling Fast', dot: '🟡' };
+      return { status: 'Full', dot: '🔴' };
+    }
+    function getRandomSlots(status) {
+      if (status === 'Available') return Math.floor(Math.random() * 50) + 30;
+      if (status === 'Filling Fast') return Math.floor(Math.random() * 20) + 5;
+      return 0;
+    }
+    function renderParkingLots() {
+      const list = document.getElementById('parking-list');
+      list.innerHTML = '';
+      // Generate a new status/slots array for this render
+      const parkingStatus = parkingLots.map(lot => {
+        const { status, dot } = getRandomStatus();
+        const slots = getRandomSlots(status);
+        return { status, dot, slots };
+      });
+      parkingLots.forEach((lot, idx) => {
+        const { status, dot, slots } = parkingStatus[idx];
+        const card = document.createElement('div');
+        card.className = 'parking-card';
+        card.innerHTML = `
+          <div class="parking-title">${lot.name}</div>
+          <div class="parking-meta">Distance: ${lot.distance} km</div>
+          <div class="parking-slots">Free Slots: ${slots}</div>
+          <div class="parking-status"><span class="dot">${dot}</span>${status}</div>
+          <div class="parking-nav"><a href="https://www.google.com/maps/search/?api=1&query=${lot.coords[0]},${lot.coords[1]}" target="_blank">Navigate</a></div>
+        `;
+        list.appendChild(card);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', renderParkingLots);
+    document.getElementById('refresh-parking-btn').onclick = function() {
+      // Animate out
+      const cards = document.querySelectorAll('.parking-card');
+      cards.forEach(card => {
+        card.style.opacity = 0;
+        card.style.transform = 'translateY(30px)';
+      });
+      setTimeout(() => {
+        renderParkingLots();
+      }, 350);
+    };
+  </script>
+  <script>
+    // Lightweight auth wiring: attach handlers to the existing forms and override older handlers.
+    (function(){
+      const USERS_KEY = 'sr_users_v1';
+      const SESSION_KEY = 'sr_session_v1';
+      function getUsers(){ try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch(e){ return []; } }
+      function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+      function getSession(){ try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e){ return null; } }
+      function saveSession(s){ localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+      function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+      // Elements (guarded)
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+      const forgotForm = document.getElementById('forgot-form');
+      const updateForm = document.getElementById('update-password-form');
+      const logoutBtn = document.getElementById('logout-btn');
+      const profileCard = document.getElementById('profile-card');
+      const loginCard = document.querySelector('.login-card');
+      const tabSignin = document.getElementById('tab-signin');
+      const tabSignup = document.getElementById('tab-signup');
+
+      function safeText(id, txt){ const el=document.getElementById(id); if(el) el.textContent = txt; }
+      function showLogin(){ if(loginForm) loginForm.style.display='block'; if(signupForm) signupForm.style.display='none'; if(forgotForm) forgotForm.style.display='none'; if(tabSignin) tabSignin.classList.add('active'); if(tabSignup) tabSignup.classList.remove('active'); }
+      function showSignup(){ if(signupForm) signupForm.style.display='block'; if(loginForm) loginForm.style.display='none'; if(forgotForm) forgotForm.style.display='none'; if(tabSignup) tabSignup.classList.add('active'); if(tabSignin) tabSignin.classList.remove('active'); }
+      function showForgot(){ if(forgotForm) forgotForm.style.display='block'; if(loginForm) loginForm.style.display='none'; if(signupForm) signupForm.style.display='none'; if(tabSignin) tabSignin.classList.remove('active'); if(tabSignup) tabSignup.classList.remove('active'); }
+
+      function showProfile(user){ if(!user) user = getSession(); if(!user){ // fallback: switch to auth
+          if(loginCard) loginCard.style.display=''; if(profileCard) profileCard.style.display='none'; return; }
+        if(profileCard) profileCard.style.display = ''; if(loginCard) loginCard.style.display = 'none';
+        safeText('profile-username', user.username || user.name || user.email || 'User');
+        safeText('profile-eco', (user.ecoScore || 82) + ' / 100');
+        const badges = document.getElementById('profile-badges'); if(badges) badges.innerHTML = (user.badges || ['Eco Driver']).map(b => `<span class="profile-badge">${b}</span>`).join(' ');
+        const history = document.getElementById('profile-history'); if(history) history.textContent = (user.history || []).join(', ') || 'No trips yet.';
+      }
+
+      // Override handlers by setting .onsubmit (replaces earlier assignments)
+      if(loginForm){
+        loginForm.onsubmit = function(e){ e.preventDefault(); const id = (document.getElementById('login-username')||{}).value||''; const pass = (document.getElementById('login-password')||{}).value||''; const users = getUsers(); const user = users.find(u => ((u.email && u.email.toLowerCase() === id.toLowerCase()) || (u.username && u.username.toLowerCase() === id.toLowerCase())) && u.password === pass); const msgEl = document.getElementById('login-message'); if(user){ saveSession(user); if(msgEl){ msgEl.style.color = '#43cea2'; msgEl.textContent = 'Signed in.';} showProfile(user); } else { if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'Invalid credentials.';} } };
+      }
+
+      if(signupForm){
+        signupForm.onsubmit = function(e){ e.preventDefault(); const name = (document.getElementById('signup-name')||{}).value.trim(); const email = ((document.getElementById('signup-email')||{}).value||'').trim().toLowerCase(); const pass = (document.getElementById('signup-password')||{}).value||''; const confirm = (document.getElementById('signup-confirm')||{}).value||''; const msgEl = document.getElementById('signup-message'); if(!name||!email||!pass){ if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'All fields required.';} return; } if(!/\S+@\S+\.\S+/.test(email)){ if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'Enter a valid email.';} return; } if(pass.length < 8){ if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'Password must be 8+ chars.';} return; } if(pass !== confirm){ if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'Passwords do not match.';} return; } const users = getUsers(); if(users.find(u => u.email === email)){ if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'Email already registered.';} return; } const user = { username: name, email, password: pass, ecoScore: 82, badges: ['Eco Driver'], history: [] }; users.push(user); saveUsers(users); saveSession(user); if(msgEl){ msgEl.style.color = '#43cea2'; msgEl.textContent = 'Account created. Signed in.';} setTimeout(()=> showProfile(user), 600); };
+      }
+
+      if(forgotForm){
+        forgotForm.onsubmit = function(e){ e.preventDefault(); const q = ((document.getElementById('forgot-email')||{}).value||'').trim().toLowerCase(); const msgEl = document.getElementById('forgot-message'); const users = getUsers(); if(users.find(u => (u.email && u.email.toLowerCase() === q) || (u.username && u.username.toLowerCase() === q))){ if(msgEl){ msgEl.style.color = '#43cea2'; msgEl.textContent = 'A reset link has been sent (simulated).'; } } else { if(msgEl){ msgEl.style.color = '#ef4444'; msgEl.textContent = 'User not found.'; } } };
+      }
+
+      if(updateForm){
+        updateForm.onsubmit = function(e){ e.preventDefault(); const newPass = (document.getElementById('new-password')||{}).value||''; const msgEl = document.getElementById('profile-message'); if(newPass.length < 8){ if(msgEl) msgEl.textContent = 'Password must be 8+ chars.'; return; } const sess = getSession(); if(!sess){ if(msgEl) msgEl.textContent = 'Not signed in.'; return; } let users = getUsers(); users = users.map(u => { if((u.email && sess.email && u.email === sess.email) || (u.username && sess.username && u.username === sess.username)){ u.password = newPass; sess.password = newPass; } return u; }); saveUsers(users); saveSession(sess); if(msgEl) msgEl.textContent = 'Password updated!'; const np = document.getElementById('new-password'); if(np) np.value = ''; };
+      }
+
+      if(logoutBtn){ logoutBtn.onclick = function(){ clearSession(); if(profileCard) profileCard.style.display = 'none'; if(loginCard) loginCard.style.display = ''; showLogin(); }; }
+
+      if(tabSignin) tabSignin.addEventListener('click', function(e){ e.preventDefault(); showLogin(); });
+      if(tabSignup) tabSignup.addEventListener('click', function(e){ e.preventDefault(); showSignup(); });
+
+      // Initialize: if session exists, show profile
+      document.addEventListener('DOMContentLoaded', function(){ const s = getSession(); if(s){ showProfile(s); } else { showLogin(); } });
+    })();
+  </script>
+</html>
